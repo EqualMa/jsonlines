@@ -74,5 +74,8 @@
       "pre-commit": "lint-staged"
     }
   },
+  "publishConfig": {
+    "access": "public"
+  },
   "version": "0.0.1"
 }
