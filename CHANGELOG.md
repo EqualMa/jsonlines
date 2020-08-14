@@ -1,3 +1,17 @@
+# [1.0.0-beta.2](https://github.com/EqualMa/jsonlines/compare/v1.0.0-beta.1...v1.0.0-beta.2) (2020-08-14)
+
+
+### Bug Fixes
+
+* readline stream should read the last line before eof ([03d25e2](https://github.com/EqualMa/jsonlines/commit/03d25e2e288b6d90692eda9a66407ed045f86110))
+* stringify options.encoding not respected ([ee14b62](https://github.com/EqualMa/jsonlines/commit/ee14b62ad99b5ad883c569a2127258f005e61fd4))
+
+
+### Features
+
+* parse null with nullValue ([b1bddbb](https://github.com/EqualMa/jsonlines/commit/b1bddbb16ac2bcdf74613385f52209e0aeb613aa))
+* stringify and parse null with nullValue ([30f0d7c](https://github.com/EqualMa/jsonlines/commit/30f0d7c3d0c88874a80ecb1f7fb6b32f024d5926))
+
 # 1.0.0-beta.1 (2020-08-03)
 
 
