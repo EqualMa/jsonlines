@@ -21,11 +21,13 @@ const entryFiles = Object.assign(
     .map(kvToObj),
 );
 
+const chunkFileNames = "_chunks/[name]-[hash].js";
+
 export default {
   input: entryFiles,
   output: [
-    { dir: "dist", format: "cjs", sourcemap: true },
-    { dir: "dist/es", format: "es", sourcemap: true },
+    { dir: "dist", format: "cjs", sourcemap: true, chunkFileNames },
+    { dir: "dist/es", format: "es", sourcemap: true, chunkFileNames },
   ],
   plugins: [
     // https://github.com/Septh/rollup-plugin-node-externals
