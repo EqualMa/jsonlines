@@ -12,6 +12,8 @@ export interface JsonLinesStringifyOptions<V> {
 
 export class JsonLinesStringifyStream<V> extends Transform {
   #stringify: (v: V) => string | Promise<string>;
+
+  readonly encoding: BufferEncoding;
   readonly lineSep: string;
 
   constructor(options?: JsonLinesStringifyOptions<V>) {
@@ -19,13 +21,14 @@ export class JsonLinesStringifyStream<V> extends Transform {
       writableObjectMode: true,
     });
 
+    this.encoding = options?.encoding ?? "utf8";
     this.lineSep = getLineSepString(options?.lineSep ?? "lf");
     this.#stringify = options?.stringify ?? JSON.stringify;
   }
 
   private async _transformAsync(chunk: V) {
     const str = await this.#stringify(chunk);
-    const buf = Buffer.from(str + this.lineSep);
+    const buf = Buffer.from(str + this.lineSep, this.encoding);
     this.push(buf);
   }
 
