@@ -19,6 +19,7 @@ export function getPkgJsonBaseContents(pkg) {
     "keywords",
     "author",
     "repository",
+    "publishConfig",
   ];
   const pkgEntries = ["main", "module", "types"];
 
