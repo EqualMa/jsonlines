@@ -25,6 +25,22 @@ export class ReadLineStream<V = string> extends Transform {
     this.#parser = options?.parse;
   }
 
+  private async _emitLines(lines: string[]) {
+    const p = this.#parser;
+    if (lines.length > 0) {
+      const values =
+        typeof p === "function"
+          ? // process with parser
+            await Promise.all(lines.map(p))
+          : lines;
+
+      for (const v of values) {
+        if (v === null) throw new Error("unexpected null when parsing lines");
+        else this.push(v);
+      }
+    }
+  }
+
   private async _writeStrAsync(str: string) {
     const rawLines = str.split(this.#lineSep);
     const len = rawLines.length;
@@ -47,20 +63,7 @@ export class ReadLineStream<V = string> extends Transform {
     this.#unfinishedBuf = unfinishedLine.length > 0 ? [unfinishedLine] : [];
 
     // emit data
-
-    const p = this.#parser;
-    if (lines.length > 0) {
-      const values =
-        typeof p === "function"
-          ? // process with parser
-            await Promise.all(lines.map(p))
-          : lines;
-
-      for (const v of values) {
-        if (v === null) throw new Error("unexpected null when parsing lines");
-        else this.push(v);
-      }
-    }
+    await this._emitLines(lines);
   }
 
   _transform(
@@ -77,6 +80,13 @@ export class ReadLineStream<V = string> extends Transform {
   _flush(callback: TransformCallback): void {
     const str = this.#decoder.end();
     this._writeStrAsync(str)
+      .then(() => {
+        // process last line before eof
+        const line = this.#unfinishedBuf.join("");
+        this.#unfinishedBuf = [];
+
+        if (line.length > 0) return this._emitLines([line]);
+      })
       .then(() => callback())
       .catch((err) => callback(err));
   }
