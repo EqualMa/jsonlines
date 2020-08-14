@@ -157,7 +157,7 @@ null
   source.pipe(parseStream);
 
   for await (const value of parseStream) {
-    if (value === require("./dist/null-value").nullValue)
+    if (value === require("@jsonlines/core/null-value").nullValue)
       console.log(`--- The following value is nullValue ---`);
 
     console.log(value);
