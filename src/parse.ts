@@ -1,10 +1,23 @@
 import { AsyncDuplexBase } from "./util/duplex-base";
-import { ReadLineStream, ReadLineStreamOptions } from "./readline-stream";
+import {
+  ReadLineStream,
+  ReadLineStreamOptions,
+  LineParser,
+} from "./readline-stream";
+import { nullValue } from "./null-value";
 
 export type JsonLinesGzipOption = boolean | import("zlib").ZlibOptions;
 
 export interface JsonLinesParseOptions<V> extends ReadLineStreamOptions<V> {
   gzip?: JsonLinesGzipOption;
+}
+
+function wrapParseFunc<V>(parse: LineParser<V>): LineParser<V> {
+  return (line) =>
+    Promise.resolve(parse(line)).then((s) => {
+      if (s === null) return nullValue as never;
+      else return s;
+    });
 }
 
 export class JsonLinesParseStream<V = unknown> extends AsyncDuplexBase {
@@ -14,7 +27,7 @@ export class JsonLinesParseStream<V = unknown> extends AsyncDuplexBase {
     const readline = new ReadLineStream({
       encoding: options?.encoding,
       lineSep: options?.lineSep ?? "lf",
-      parse: options?.parse ?? JSON.parse,
+      parse: wrapParseFunc(options?.parse ?? JSON.parse),
     });
 
     super(

@@ -1,5 +1,8 @@
+declare const __NULL_VALUE_UNIQUE_KEY: unique symbol;
+
 // eslint-disable-next-line @typescript-eslint/ban-types
-export const nullValue: object = Object.create(null) as object;
+export type NullValue = typeof __NULL_VALUE_UNIQUE_KEY & {};
+export const nullValue: NullValue = Object.create(null) as never;
 
 Reflect.defineProperty(nullValue, Symbol.toStringTag, {
   value: Object.prototype.toString
