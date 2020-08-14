@@ -4,9 +4,42 @@ import { JsonLinesGzipOption } from "./parse";
 import { LineSepOption, getLineSepString } from "./util/line-sep";
 
 export interface JsonLinesStringifyOptions<V> {
+  /**
+   * specify the encoding to encode string to buffer
+   *
+   * NOTE that [the standard jsonlines](http://jsonlines.org/)
+   * requires `utf8` as file encoding
+   *
+   * Defaults to `utf8`
+   */
   encoding?: BufferEncoding;
+
+  /**
+   * specify a function to stringify values.
+   * It accepts a value as parameter,
+   * and should return a string or a Promise<string>.
+   *
+   * Defaults to `JSON.stringify`
+   */
   stringify?: (v: V) => string | Promise<string>;
+
+  /**
+   * specify whether to gzip the output
+   *
+   * Omit or use `false` to disable gzip.
+   * Use `true` to gzip with default options.
+   * Or use an object as params for `require('zlib').createGzip`
+   */
   gzip?: JsonLinesGzipOption;
+
+  /**
+   * specify the line ending to be used in the output
+   *
+   * NOTE that [the standard jsonlines](http://jsonlines.org/)
+   * requires `\n` as line separator
+   *
+   * Defaults to `\n`
+   */
   lineSep?: LineSepOption;
 }
 
