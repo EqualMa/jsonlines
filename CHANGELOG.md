@@ -1,3 +1,10 @@
+## [1.0.2](https://github.com/EqualMa/jsonlines/compare/v1.0.1...v1.0.2) (2020-08-15)
+
+
+### Bug Fixes
+
+* stringify gzip error ([89c872e](https://github.com/EqualMa/jsonlines/commit/89c872ee66e174064e11e1e31fe8b62a8db86290))
+
 ## [1.0.1](https://github.com/EqualMa/jsonlines/compare/v1.0.0...v1.0.1) (2020-08-15)
 
 
