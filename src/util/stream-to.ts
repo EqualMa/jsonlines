@@ -23,3 +23,13 @@ export async function streamToString(
   const buffer = await streamToBuffer(stream);
   return buffer.toString(encoding);
 }
+
+export async function asyncIterableToArray<T>(
+  iter: AsyncIterable<T> | Iterable<T>,
+): Promise<T[]> {
+  const res: T[] = [];
+  for await (const v of iter) {
+    res.push(v);
+  }
+  return res;
+}
