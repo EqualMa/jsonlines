@@ -13,6 +13,101 @@ npm install @jsonlines/core
 yarn add @jsonlines/core
 ```
 
+## Features Guide
+
+<details>
+<summary>
+Easy to use. parse stream and stringify stream are standard node duplex streams
+</summary>
+
+stringify
+
+```js
+require("stream")
+  .Readable.from([{ v: 1 }, { v: 2 }])
+  .pipe(require("@jsonlines/core").stringify())
+  .pipe(require("fs").createWriteStream("mydata.jsonl"));
+```
+
+parse
+
+```js
+require("fs")
+  .createReadStream("mydata.jsonl")
+  .pipe(require("@jsonlines/core").parse())
+  .on("data", (data) => {
+    console.log("parsed data: ", data);
+  });
+```
+
+</details>
+
+<details>
+<summary>
+Custom stringify / parse functions. Async function or function that returns a Promise is also supported.
+</summary>
+
+```js
+require("stream")
+  .Readable.from([{ v: 1 }, { v: 2 }])
+  .pipe(
+    require("@jsonlines/core").stringify({
+      stringify: myCustomStringifyFunction,
+    }),
+  )
+  .pipe(require("fs").createWriteStream("mydata.jsonl"));
+```
+
+```js
+require("fs")
+  .createReadStream("mydata.jsonl")
+  .pipe(
+    require("@jsonlines/core").parse({
+      parse: myCustomParseFunction,
+    }),
+  )
+  .on("data", (data) => {
+    console.log("receive data: ", data);
+  });
+```
+
+</details>
+
+<details>
+<summary>
+Gzip / Gunzip
+</summary>
+
+stringify to a `.jsonl.gz`
+
+```js
+require("stream")
+  .Readable.from([{ v: 1 }, { v: 2 }])
+  .pipe(
+    require("@jsonlines/core").stringify({
+      gzip: true,
+    }),
+  )
+  .pipe(require("fs").createWriteStream("mydata.jsonl.gz"));
+```
+
+parse from a `.jsonl.gz`
+
+```js
+require("fs")
+  .createReadStream("mydata.jsonl.gz")
+  .pipe(
+    require("@jsonlines/core").parse({
+      gzip: true,
+    }),
+  )
+  .on("data", (data) => {
+    console.log("receive data: ", data);
+  });
+```
+
+</details>
+
 ## Usage
 
 ### stringify
@@ -138,8 +233,7 @@ const { parse } = require("@jsonlines/core/parse");
 import { parse } from "@jsonlines/core";
 import { parse } from "@jsonlines/core/parse";
 
-(async () => {
-  const source = require("stream").Readable.from(`{"v":"object1"}
+const source = require("stream").Readable.from(`{"v":"object1"}
 {"name":"Lady Gaga","records":["Chromatica"]}
 [1,2,3,4]
 true
@@ -152,18 +246,18 @@ null
 [null,null]
 `);
 
-  // create a parse stream, which is a duplex stream
-  const parseStream = parse();
+// create a parse stream, which is a duplex stream
+const parseStream = parse();
 
-  source.pipe(parseStream);
+source.pipe(parseStream);
 
-  for await (const value of parseStream) {
-    if (value === require("@jsonlines/core/null-value").nullValue)
-      console.log(`--- The following value is nullValue ---`);
+// you can also consume it with for await ... of
+parseStream.on("data", (value) => {
+  if (value === require("@jsonlines/core/null-value").nullValue)
+    console.log(`--- The following value is nullValue ---`);
 
-    console.log(value);
-  }
-})();
+  console.log(value);
+});
 ```
 
 the output will be:
