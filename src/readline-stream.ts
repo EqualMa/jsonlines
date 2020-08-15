@@ -1,5 +1,4 @@
 import { Transform, TransformCallback } from "stream";
-import { StringDecoder } from "string_decoder";
 import { LineSepOption, getLineSepSplitter } from "./util/line-sep";
 
 export type LineParser<V> = (line: string) => V | Promise<V>;
@@ -13,14 +12,21 @@ export interface ReadLineStreamOptions<V = string> {
 export class ReadLineStream<V = string> extends Transform {
   /** last line which is not finished yet */
   #unfinishedBuf: string[] = [];
-  #decoder: StringDecoder;
+  #encoding: BufferEncoding | undefined;
+
+  /**
+   * undefined means not initialized;
+   * null means the source stream emits string, so a decoder is not needed
+   * StringDecoder means the source stream emits buffer
+   */
+  #decoder: undefined | null | import("string_decoder").StringDecoder;
   #lineSep: RegExp | string;
   #parser: undefined | LineParser<V>;
 
   constructor(options?: ReadLineStreamOptions<V>) {
     super({ readableObjectMode: true });
 
-    this.#decoder = new StringDecoder(options?.encoding);
+    this.#encoding = options?.encoding;
     this.#lineSep = getLineSepSplitter(options?.lineSep ?? "auto");
     this.#parser = options?.parse;
   }
@@ -66,27 +72,50 @@ export class ReadLineStream<V = string> extends Transform {
     await this._emitLines(lines);
   }
 
+  private async _writeChunkAsync(chunk: Buffer | string) {
+    if (this.#decoder === undefined) {
+      // init decoder or set to null
+      if (typeof chunk === "string") {
+        this.#decoder = null;
+      } else {
+        const { StringDecoder } = await import("string_decoder");
+        this.#decoder = new StringDecoder(this.#encoding);
+      }
+    }
+
+    let str: string;
+    if (this.#decoder === null) {
+      str = typeof chunk === "string" ? chunk : String(chunk);
+    } else {
+      str = this.#decoder.write(chunk as Buffer);
+    }
+
+    if (str.length > 0) await this._writeStrAsync(str);
+  }
+
   _transform(
-    chunk: Buffer,
+    chunk: Buffer | string,
     encoding: BufferEncoding,
     callback: TransformCallback,
   ): void {
-    const str = this.#decoder.write(chunk);
-    this._writeStrAsync(str)
+    this._writeChunkAsync(chunk)
       .then(() => callback())
       .catch((err) => callback(err));
   }
 
-  _flush(callback: TransformCallback): void {
-    const str = this.#decoder.end();
-    this._writeStrAsync(str)
-      .then(() => {
-        // process last line before eof
-        const line = this.#unfinishedBuf.join("");
-        this.#unfinishedBuf = [];
+  private async _flushAsync() {
+    const str = this.#decoder?.end();
+    if (str) await this._writeStrAsync(str);
 
-        if (line.length > 0) return this._emitLines([line]);
-      })
+    // process last line before eof
+    const line = this.#unfinishedBuf.join("");
+    this.#unfinishedBuf = [];
+
+    if (line.length > 0) return this._emitLines([line]);
+  }
+
+  _flush(callback: TransformCallback): void {
+    this._flushAsync()
       .then(() => callback())
       .catch((err) => callback(err));
   }
