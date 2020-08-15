@@ -95,7 +95,7 @@ export class JsonLinesStringifyStreamWithGzip<
           : stringifyStream,
         writable: stringifyStream,
       },
-      { readableObjectMode: true, writableObjectMode: false },
+      { readableObjectMode: false, writableObjectMode: true },
     );
   }
 }
