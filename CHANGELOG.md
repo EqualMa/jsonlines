@@ -1,3 +1,11 @@
+## [1.0.1](https://github.com/EqualMa/jsonlines/compare/v1.0.0...v1.0.1) (2020-08-15)
+
+
+### Bug Fixes
+
+* readline-stream should emit buffer is encoding is not specified ([af512f3](https://github.com/EqualMa/jsonlines/commit/af512f379d10e210a974f09c7afeda90c0f7af96))
+* stringify should respect Buffer.from default encoding ([44f5b5d](https://github.com/EqualMa/jsonlines/commit/44f5b5d4c8a5b50689aa780ca56d93d31aa7ae15))
+
 # 1.0.0 (2020-08-14)
 
 
