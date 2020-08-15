@@ -10,7 +10,8 @@ export interface JsonLinesStringifyOptions<V> {
    * NOTE that [the standard jsonlines](http://jsonlines.org/)
    * requires `utf8` as file encoding
    *
-   * Defaults to `utf8`
+   * Defaults to `Buffer.from` default encoding,
+   * which is `utf8`.
    */
   encoding?: BufferEncoding;
 
@@ -46,7 +47,7 @@ export interface JsonLinesStringifyOptions<V> {
 export class JsonLinesStringifyStream<V> extends Transform {
   #stringify: (v: V) => string | Promise<string>;
 
-  readonly encoding: BufferEncoding;
+  readonly encoding: BufferEncoding | undefined;
   readonly lineSep: string;
 
   constructor(options?: JsonLinesStringifyOptions<V>) {
@@ -54,7 +55,7 @@ export class JsonLinesStringifyStream<V> extends Transform {
       writableObjectMode: true,
     });
 
-    this.encoding = options?.encoding ?? "utf8";
+    this.encoding = options?.encoding;
     this.lineSep = getLineSepString(options?.lineSep ?? "lf");
     this.#stringify = options?.stringify ?? JSON.stringify;
   }

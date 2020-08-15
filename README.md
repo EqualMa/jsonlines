@@ -92,7 +92,8 @@ export interface JsonLinesStringifyOptions<V> {
    * NOTE that [the standard jsonlines](http://jsonlines.org/)
    * requires `utf8` as file encoding
    *
-   * Defaults to `utf8`
+   * Defaults to `Buffer.from` default encoding,
+   * which is `utf8`.
    */
   encoding?: BufferEncoding;
 
